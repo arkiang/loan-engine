@@ -44,24 +44,6 @@ func (h *LoanHandler) CreateLoan(c *gin.Context) {
 	c.JSON(http.StatusCreated, resp)
 }
 
-// MakeScheduledPayment an api to make a payment without concern about due date (for testing)
-func (h *LoanHandler) MakeScheduledPayment(c *gin.Context) {
-	loanID, err := strconv.Atoi(c.Param("id"))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid loan id"})
-		return
-	}
-
-	err = h.Service.MakeScheduledPayment(uint(loanID))
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"result": "payment successful"})
-}
-
-// MakePayment an api to make a payment with concern about due date
 func (h *LoanHandler) MakePayment(c *gin.Context) {
 	loanID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {

@@ -16,7 +16,6 @@ func RegisterRoutes(loanHandler *handler.LoanHandler,
 
 	r.POST("/loans", loanHandler.CreateLoan)
 	r.POST("/loans/:id/pay", loanHandler.MakePayment)
-	r.POST("/loans/:id/pay/test", loanHandler.MakeScheduledPayment)
 	r.GET("/loans/:id/outstanding", loanHandler.GetOutstanding)
 	r.GET("/loans/:id/delinquent", loanHandler.CheckDelinquency)
 

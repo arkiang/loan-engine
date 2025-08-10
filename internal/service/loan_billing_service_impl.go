@@ -75,51 +75,35 @@ func (s *loanBillingService) CreateLoanWithSchedule(customerID uint, productID u
 	return loan, nil
 }
 
-func (s *loanBillingService) MakeScheduledPayment(loanID uint) error {
-	// Get the next unpaid schedule
-	schedule, err := s.repaymentScheduleUsecase.GetNextUnpaidSchedule(loanID)
-	if err != nil {
-		return fmt.Errorf("no unpaid schedule found: %w", err)
-	}
-
-	payment := &model.Payment{
-		LoanID:        loanID,
-		Amount:        schedule.Amount,
-		PaidAt:        time.Now(),
-		PaymentMethod: "AmarthaBank",
-		Status:        model.PaymentStatusSuccess,
-	}
-
-	if err := s.paymentUsecase.MakePayment(payment); err != nil {
-		return fmt.Errorf("make payment failed: %w", err)
-	}
-
-	if err := s.repaymentScheduleUsecase.MarkAsPaid(schedule.ID, payment.PaidAt); err != nil {
-		return fmt.Errorf("mark schedule as paid failed: %w", err)
-	}
-
-	return nil
-}
-
 func (s *loanBillingService) MakePayment(loanID uint) error {
 	// 1. Get all overdue unpaid schedules
 	schedules, err := s.repaymentScheduleUsecase.GetOverdueUnpaidSchedule(loanID)
 	if err != nil {
 		return fmt.Errorf("failed to get overdue schedules: %w", err)
 	}
-	if len(schedules) == 0 {
-		return fmt.Errorf("no overdue unpaid schedules found")
-	}
 
-	var totalOverdue int64
-	for _, schedule := range schedules {
-		totalOverdue += schedule.Amount
+	var scheduleIds []uint
+
+	var amount int64
+	if len(schedules) == 0 {
+		schedule, err := s.repaymentScheduleUsecase.GetNextUnpaidSchedule(loanID)
+		if err != nil {
+			return fmt.Errorf("no unpaid schedule found: %w", err)
+		}
+
+		amount = schedule.Amount
+		scheduleIds = append(scheduleIds, schedule.ID)
+	} else {
+		for _, schedule := range schedules {
+			amount += schedule.Amount
+			scheduleIds = append(scheduleIds, schedule.ID)
+		}
 	}
 
 	// 4. Create payment record
 	payment := &model.Payment{
 		LoanID:        loanID,
-		Amount:        totalOverdue,
+		Amount:        amount,
 		PaidAt:        time.Now(),
 		PaymentMethod: "AmarthaBank",
 		Status:        model.PaymentStatusSuccess,
@@ -130,9 +114,9 @@ func (s *loanBillingService) MakePayment(loanID uint) error {
 	}
 
 	// 5. Mark all overdue schedules as paid
-	for _, schedule := range schedules {
-		if err := s.repaymentScheduleUsecase.MarkAsPaid(schedule.ID, payment.PaidAt); err != nil {
-			return fmt.Errorf("mark schedule %d as paid failed: %w", schedule.ID, err)
+	for _, value := range scheduleIds {
+		if err := s.repaymentScheduleUsecase.MarkAsPaid(value, payment.PaidAt); err != nil {
+			return fmt.Errorf("mark schedule %d as paid failed: %w", value, err)
 		}
 	}
 
