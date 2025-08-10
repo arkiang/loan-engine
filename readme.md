@@ -47,10 +47,67 @@ This will:
 
 ## System Design
 
-![img.png](img.png)
+```mermaid
+erDiagram
+    CUSTOMER {
+        uint id PK
+        string name
+        string email
+        string phone
+        time created_at
+    }
 
-[Mermaid Js](https://mermaid.live/edit#pako:eNqlVNuO2jAQ_ZXIzwEFcgHytoJUlbosiMtDK6TIaw9gNbFTx6lKgX9fO2FZSGhZCT8lM2fsMzNnZo-IoIBCBHLE8EbidMUtfYbL-WIyjmbWvvo3p2BcWYxa028ftlxJxjcWxyk0jJBiljSs2VbwC6xiKVhEAlZAY6wqx3HFq4_nydPLPQqljRS5EinIWDu_1J2JwDzOpKCCFKqO0IDAszLNjbAMX_Bd6zDj0gCQkKtYao71OCUUTmKcioKrK58lIcO7FLiKybXzVIcP_1rCrwI42dWqkissVUyvXv1_uWbR9On7OHpZxPPh12i0fI4-VbyyPs2yWHnFq5F0Pd1XIRKL5XGGGa1RpQXcysAgz_Tv53XK6pFkbtA-NUKXWRV5U6en7qSgtoI-xt_IOJ7OJqPlcPHIRFHIiWSZYoL_U8ANMd7X8WNafe8-Jor9_rRUzwvmcGi1xL6a9NBaoS3OV-hi-o-i1TocrktocK-QCL7J9QRewU_X3ZgEE0QEV5jx_FbIu8gMTgIRkmoYspHeKnqRUb0jy86tkNqC7g0yOIrlT3PXUeOKzAg9okwJicI1TnKwES6UmO84ORsq1GnXnq1QRo2rVVxuZBtlmP8QQmOULKD8ReEe_UFhJ_Da_W63N3C9Tsfvej3PRjsUdoO2N-j5rh947sB3naB_tNHf8gan3Xdcr9_ru57jOG7gD2wkRbHZnglspMmwekkCpyCHRgn6Mb_nH98AA4HbPg)
+    LOAN {
+        uint id PK
+        uint customer_id FK
+        uint loan_prodocut_id FK
+        int64 principal
+        float64 interest_rate
+        int64 total_amount
+        int repayment_count
+        string repayment_frequency
+        time start_date
+        time created_at
+    }
 
+    REPAYMENT_SCHEDULE {
+        uint id PK
+        uint loan_id FK
+        int sequence
+        int64 amount
+        bool is_paid
+        time due_date
+        time paid_at
+        time created_at
+    }
+
+    PAYMENT {
+        uint id PK
+        uint loan_id FK
+        int64 amount
+        string status
+        string payment_method
+        time paid_at
+        time created_at
+    }
+
+    LOAN_PRODUCT {
+        uint id PK
+        string name
+        string description
+        int64 principal_amount
+        float64 interest_rate
+        int repayment_count
+        string repayment_frequency
+        bool is_active
+        time created_at
+    }
+
+    CUSTOMER ||--o{ LOAN : "has"
+    LOAN }o--|| LOAN_PRODUCT : "belongs to"
+    LOAN ||--o{ REPAYMENT_SCHEDULE : "contains"
+    LOAN ||--o{ PAYMENT : "records"
+```
 ---
 
 ## 📬 API Endpoints
