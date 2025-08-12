@@ -124,3 +124,6 @@ erDiagram
 | GET    | `/loans/:id/outstanding` | Get outstanding amount for a loan                                              |
 | POST   | `/loans/:id/delinquent`  | Get delinquent status of a loan                                                |
 | GET    | `/loans/:id/outstanding` | Get total outstanding amount by customer                                       |
+
+## Testing
+you can import postman file inside folder postman to test all the api.
